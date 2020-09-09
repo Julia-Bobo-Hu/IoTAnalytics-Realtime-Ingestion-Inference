@@ -1,0 +1,245 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: IoT Analytics Stack Example
+Parameters:
+  ProjectName:
+    Type: String
+    MinLength: 1
+    Default: iot-analytics-demo
+    Description: Project name value used in 'Project' tag.
+  IoTTopicName:
+    Type: String
+    MinLength: 1
+    Default: iot-device-data
+    Description: IoT Topic Name that your devices will send messages to.
+Resources:
+  DeviceOne:
+    Type: 'AWS::IoT::Thing'
+    Properties:
+      ThingName: iot-device-weather
+      AttributePayload:
+        Attributes:
+          Longitude: -122.1513069
+          Latitude: 37.4133144
+          Installed: 1594665292
+  IoTTopicRuleAllEvents:
+    Type: 'AWS::IoT::TopicRule'
+    Properties:
+      RuleName: send_to_iot_analytics
+      TopicRulePayload:
+        Description: Sends IoT device data to IoT Analytics Channel
+        AwsIotSqlVersion: 2016-03-23
+        RuleDisabled: 'false'
+        Sql: !Sub |
+          SELECT site_id, timestamp, air_temperature, cloud_coverage, dew_temperature, precip_depth_1_hr, sea_level_pressure, wind_direction, wind_speed 
+          FROM "${IoTTopicName}"
+        Actions:
+          - IotAnalytics:
+              ChannelName: !Ref IoTAnalyticsChannel
+              RoleArn: !GetAtt IoTTopicRuleRole.Arn
+  IoTAnalyticsChannel:
+    Type: 'AWS::IoTAnalytics::Channel'
+    Properties:
+      ChannelName: iot_analytics_channel
+      RetentionPeriod:
+        Unlimited: false
+        NumberOfDays: 14
+      Tags:
+        - Key: Project
+          Value: !Ref ProjectName
+  IoTAnalyticsPipeline:
+    Type: 'AWS::IoTAnalytics::Pipeline'
+    Properties:
+      PipelineName: iot_analytics_pipeline
+      PipelineActivities:
+        - Channel:
+            Name: ChannelActivity
+            ChannelName: !Ref IoTAnalyticsChannel
+            Next: DatastoreActivity
+          Datastore:
+            Name: DatastoreActivity
+            DatastoreName: !Ref IoTAnalyticsDatastore
+  IoTAnalyticsDatastore:
+    Type: 'AWS::IoTAnalytics::Datastore'
+    Properties:
+      DatastoreName: iot_analytics_data_store
+      RetentionPeriod:
+        Unlimited: false
+        NumberOfDays: 14
+
+  IoTAnalyticsDataset:
+    Type: 'AWS::IoTAnalytics::Dataset'
+    Properties:
+      Actions:
+        - ActionName: SqlAction
+          QueryAction:
+            SqlQuery: !Sub 'select * from ${IoTAnalyticsDatastore}'
+      DatasetName: iot_analytics_data_set
+      RetentionPeriod:
+        Unlimited: false
+        NumberOfDays: 14
+      ContentDeliveryRules:
+        - Destination:
+            S3DestinationConfiguration:
+              Bucket: !Ref DataSetOutputBucket
+              RoleArn: !GetAtt DataSetOutputBucketRole.Arn
+              Key: 'dataset/mydataset/!{iotanalytics:scheduleTime}/!{iotanalytics:versionId}.csv'
+      Triggers:
+        - Schedule:
+            ScheduleExpression: cron(0/15 * * * ? *)
+
+  DataSetOutputBucket:
+    DeletionPolicy: Retain
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+          - Id: ExpirationRule
+            Status: Enabled
+            ExpirationInDays: 28
+
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W51
+            reason: 'This is a private bucket. Does not require bucket policy'
+  PipelineLambdaFunction:
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      Code:
+        S3Bucket: check-ride-data-explore
+        S3Key: lambda_numpy.zip
+      Handler: index.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Runtime: python2.7
+      Timeout: 60
+      MemorySize: 128
+  DataSetOutputBucketRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - iotanalytics.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: 'DataSetOutputBucketPolicy'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              Effect: Allow
+              Action:
+                - s3:PutObject
+                - s3:DeleteObject
+                - s3:GetBucketLocation
+                - s3:GetObject
+                - s3:ListBucket
+                - s3:ListBucketMultipartUploads
+                - s3:ListMultipartUploadParts
+                - s3:AbortMultipartUpload
+              Resource:
+                - !Sub '${DataSetOutputBucket.Arn}'
+                - !Sub '${DataSetOutputBucket.Arn}/*'
+  PipelineLambdaPermission:
+      Type: 'AWS::Lambda::Permission'
+      Properties:
+        FunctionName: !GetAtt PipelineLambdaFunction.Arn
+        Action: lambda:InvokeFunction
+        Principal: iotanalytics.amazonaws.com
+  LambdaExecutionRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Policies:
+        - PolicyName: allowLambdaLogs
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+            - Effect: Allow
+              Action:
+              - logs:*
+              Resource: arn:aws:logs:*:*:*
+  IoTAnalyticsPipelineRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - iotanalytics.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Path: /
+      Policies:
+        - PolicyName: IoTTopicRulePolicyDeviceRegistry
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              Effect: Allow
+              Action:
+                - iot:DescribeThing
+              Resource: !Join
+                - ''
+                - - 'arn:aws:iot:'
+                  - !Ref 'AWS::Region'
+                  - ':'
+                  - !Ref 'AWS::AccountId'
+                  - ':thing/'
+                  - '*'
+
+  IoTTopicRuleRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - iot.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Path: /
+      Policies:
+        - PolicyName: IoTTopicRulePolicyIoTAnalyticsChannel
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              Effect: Allow
+              Action:
+                - iotanalytics:BatchPutMessage
+              Resource: !Join
+                - ''
+                - - 'arn:aws:iotanalytics:'
+                  - !Ref 'AWS::Region'
+                  - ':'
+                  - !Ref 'AWS::AccountId'
+                  - ':channel/'
+                  - !Ref IoTAnalyticsChannel
+
+Outputs:
+  IncomingIoTDataTopicName:
+    Value: !Ref IoTTopicName

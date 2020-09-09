@@ -1,0 +1,5 @@
+{
+   "stream_name":"REPLACE_EXAMPLE_KINESIS_STREAM",
+   "channel_name":"REPLACE_WITH_IOT_CHANNEL_NAME",
+   "bucket":"jh_bpm-blog-generated-data"
+}

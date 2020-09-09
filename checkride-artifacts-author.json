@@ -1,0 +1,14 @@
+{
+  "full_name": "Julia Hu",
+  "email": "juliahu@amazon.com",
+  "github_username": "julia-bobo-hu",
+  "project_name": "Automated Historian IoT Data Exploration",
+  "project_short_description": "This is a project using multiple AWS services to automate historian IoT data Exploration": "{{ cookiecutter.github_username }}",
+  "version": "0.1.0",
+  "use_pytest": "n",
+  "use_pypi_deployment_with_travis": "n",
+  "add_pyup_badge": "n",
+  "command_line_interface": ["Click", "Argparse", "No command-line interface"],
+  "create_author_file": "y",
+  "open_source_license": ["MIT license", "BSD license", "ISC license", "Apache Software License 2.0", "GNU General Public License v3", "Not open source"]
+}
