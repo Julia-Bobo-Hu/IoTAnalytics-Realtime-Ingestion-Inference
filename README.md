@@ -10,4 +10,4 @@ With efficient AWS managed IoT Analytics platform, these two parts are mutually 
 
 ## Step 1: A walk through of the high-level solution architect for Real-time IoT data ingestion and inference:
 
-![alt text](https://github.com/Julia-Bobo-Hu/Automated-Historian-IoT-Data-Exploration/blob/master/images/Step1_architecture_revised_batch_method.png?raw=true)
+![alt text](https://github.com/Julia-Bobo-Hu/IoTAnalytics-Realtime-Ingestion-Inference/blob/master/images/highlevel_architect.png?raw=true)
