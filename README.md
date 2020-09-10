@@ -26,5 +26,22 @@ The second yaml file: "jh-iot-analytics-weather" is used to provision relevant I
 The reason for setting up a ingestion pipeline for weather meter data (not just using schedule rotation), is because the message schema for weather data is very different from meter reading data. 
 The IoT Pipelines for feature engineering on weather data and meter reading data are also distinctively different from each other. Based on these two considerations, a second IoT ingestion pipeline is built for weather data.
 
+Step 2: After service provision with Cloud Formation, the data ingestion will be started with AWS CLI command.
+
+In this demo, the first step for data ingestion is achieved by using AWS CLI command line to send MQTT message to IoT core.
+
+Then, run the following command using the two larger data JSON files (one for meter reading, and one for weather reading), meter_data_2018_12.json, and weather_data_2018_12.json. 
+
+time python3 ./send_sample_messages.py -f weather_data_2018_12.json -t REPLACE-WITH-YOUR-IOT-TOPIC
+
+The command will take approximately 4 minutes to complete. 
+After the data ingestion, the IoT dataset should contain 4980 weather data records. 
+
+Once an MQTT message is received from an IoT device (a thing), we use AWS IoT Rules to send message data to an AWS IoT Analytics Channel. 
+Rules give your devices the ability to interact with AWS services. Rules are written in standard Structured Query Language (SQL). 
+Rules are analyzed, and Actions are performed based on the MQTT topic stream. In our Cloudformation yaml, the SQL query used in IoT rule engine has already been specified. 
+You can change the SQL query according to your own need.
+
+
 
   
