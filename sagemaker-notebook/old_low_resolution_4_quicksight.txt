@@ -1,0 +1,24 @@
+SELECT building_id, meter, site_id, primary_use, square_feet_no, floor_count_no, year_built_no, timestamp_new, 
+avg(meter_reading_no) as avg_meter_reading,
+avg(air_temperature_no) as avg_air_temp, avg(cloud_coverage_no) as avg_cloud_cov, 
+avg(dew_temperature_no) as avg_dew_temp, avg(precip_no) as avg_precip,
+avg(sea_level_no) as avg_sea_level, avg(wind_direction_no) as avg_wind_dir,
+avg(wind_speed_no) as avg_wind_speed,  
+city, country, state
+
+FROM (SELECT building_id, meter, site_id, primary_use, 
+      try_cast(square_feet as INTEGER) as square_feet_no, 
+      try_cast(floor(try_cast(year_built as DOUBLE)) as INTEGER) as year_built_no, 
+      try_cast(floor_count as INTEGER) as floor_count_no, city, country, state,
+try_cast(meter_reading as double) as meter_reading_no,
+try_cast(air_temperature as double) as air_temperature_no,
+try_cast(cloud_coverage as double) as cloud_coverage_no,
+try_cast(dew_temperature as double) as dew_temperature_no,
+try_cast(precip_depth_1_hr as double) as precip_no,
+try_cast(sea_level_pressure as double) as sea_level_no,
+try_cast(wind_direction as double) as wind_direction_no,
+try_cast(wind_speed as double) as wind_speed_no,
+date(date_parse(timestamp, '%Y-%m-%d %H:%i:%s')) as timestamp_new
+FROM jh_demo_batch_datastore) 
+GROUP BY site_id, building_id, primary_use, meter, square_feet_no, floor_count_no, year_built_no, timestamp_new, city, country, state
+

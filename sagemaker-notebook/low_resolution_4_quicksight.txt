@@ -1,0 +1,12 @@
+SELECT building_id, meter, site_id, primary_use, timestamp_new,
+avg(try_cast(meter_reading as double)) as avg_meter_reading,
+avg(try_cast(air_temperature as double)) as avg_air_temp, 
+avg(try_cast(cloud_coverage as double)) as avg_cloud_cov, 
+avg(try_cast(dew_temperature as double)) as avg_dew_temp, 
+avg(try_cast(precip_depth_1_hr as double)) as avg_precip,
+avg(try_cast(sea_level_pressure as double)) as avg_sea_level, 
+avg(try_cast(wind_direction as double)) as avg_wind_dir,
+avg(try_cast(wind_speed as double) ) as avg_wind_speed,  
+city, country, state
+FROM (SELECT*, date(date_parse(timestamp, '%Y-%m-%d %H:%i:%s')) as timestamp_new FROM jh_iot_batch_datastore)
+GROUP BY site_id, building_id, primary_use, meter, city, country, state,timestamp_new

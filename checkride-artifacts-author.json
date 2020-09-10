@@ -2,9 +2,11 @@
   "full_name": "Julia Hu",
   "email": "juliahu@amazon.com",
   "github_username": "julia-bobo-hu",
-  "project_name": "Automated Historian IoT Data Exploration",
-  "project_short_description": "This is a project using multiple AWS services to automate historian IoT data Exploration": "{{ cookiecutter.github_username }}",
-  "version": "0.1.0",
+  "project_name": "IoTAnalytics-Realtime-Ingestion-Inference",
+  "project_short_description": "This Real-time IoT Analytics solution still use three AWS managed services as backbones. These three services are: IoT Analytics, Containerized IoT Notebook and QuickSight.
+The biggest difference between this architect compared with the phase I historian data exploration architect, is that it used IoT Topic to subscribe to the messages sending from IoT Things.
+Then IoT Topic rule is used to select data. IoT core is used to stream real-time data to IoT Analytics platform.": "{{ cookiecutter.github_username }}",
+  "version": "0.1.0"
   "use_pytest": "n",
   "use_pypi_deployment_with_travis": "n",
   "add_pyup_badge": "n",
