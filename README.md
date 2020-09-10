@@ -75,6 +75,13 @@ This lambda function requires numpy and pandas library, and these two libraries 
 
 ## Step 4: Use IoT dataset from step 3 as input for Sagemaker notebook
 
+## Step 5: Fetch output file with prediction from S3 bucket to QuickSight for dashboard
+Finally, QuickSight is used as the dashboarding tool to present analytical information to endusers. If you are the individual customers, you probably would like to learn the energy consumption variation for your home!
+
+This figure shows one example of dashboard for smart home customers. The dashboard can be embeded in other applications, and can be sent as emails to endusers.
+
+Last but not least, since the prediction from sagemaker is scheduled to run on a regular basis, the QuickSight dashboard will also refresh the prediction once the sagemaker is triggered.
+
 
 
 
