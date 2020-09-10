@@ -43,8 +43,34 @@ Rules are analyzed, and Actions are performed based on the MQTT topic stream. In
 You can change the SQL query according to your own need.
 
 ## Step 3: Add IoT pipeline activity
-A Pipeline is composed of an array of activities. In this step, various pipeline activities can be added for data cleansing and feature engineering. 
+A Pipeline is composed of an array of activities. In this step, various pipeline activities can be added for data cleansing and feature engineering.
 In the following images, it showed examples of either adding filter activity or lambda function to the pipeline.
+In this example, the filter activity eliminates outliers from a building "1099". 
+![alt text](https://github.com/Julia-Bobo-Hu/IoTAnalytics-Realtime-Ingestion-Inference/blob/master/images/pipeline_activity1.PNG?raw=true)
+![alt text](https://github.com/Julia-Bobo-Hu/IoTAnalytics-Realtime-Ingestion-Inference/blob/master/images/pipeline_activity_filter.PNG?raw=true)
+
+The following lambda function aims to use more complex transformation to generate time related features for weather data, that may require other python libraries, numpy and pandas. 
+![alt text](https://github.com/Julia-Bobo-Hu/IoTAnalytics-Realtime-Ingestion-Inference/blob/master/images/pipeline_activity2.PNG?raw=true)
+![alt text](https://github.com/Julia-Bobo-Hu/IoTAnalytics-Realtime-Ingestion-Inference/blob/master/images/pipeline_activity_lambda.PNG?raw=true)
+
+Please note, a suitable resource based policy needs to be created to allow IoT pipeline to invoke the lambda function. 
+This lambda function requires numpy and pandas library, and these two libraries are packaged with the lambda function zip file.
+
+{
+  "Version": "2012-10-17",
+  "Id": "default",
+  "Statement": [
+    {
+      "Sid": "jh-iot-check-ride-weather-PipelineLambdaPermission-15VWAOUNNJKK3",
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "iotanalytics.amazonaws.com"
+      },
+      "Action": "lambda:InvokeFunction",
+      "Resource": "arn:aws:lambda:us-east-1:593512547852:function:jh-iot-check-ride-weather-PipelineLambdaFunction-QUULAF8RTK1J"
+    }
+  ]
+}
 
 
 ## Step 4: Use IoT dataset from step 3 as input for Sagemaker notebook
