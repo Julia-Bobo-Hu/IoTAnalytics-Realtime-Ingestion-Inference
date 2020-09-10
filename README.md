@@ -22,4 +22,9 @@ These 4 smart meters are distributed in 1449 buildings across 16 cities. The tim
 In this yaml file, 4 IoT Things, IoT topic rules, IoT analytic channel, pipeline, datastore and dataset resources will be provisioned with this Cloudformation.
 This cloudformation file will also provision necessary roles for different AWS services having correct access. E.g. IoT topic rules needs to access IoT channel, IoT dataset needs S3 write access to output IoT dataset. 
 
+The second yaml file: "jh-iot-analytics-weather" is used to provision relevant IoT data ingestion ETL pipeline for weather meter data. 
+The reason for setting up a ingestion pipeline for weather meter data (not just using schedule rotation), is because the message schema for weather data is very different from meter reading data. 
+The IoT Pipelines for feature engineering on weather data and meter reading data are also distinctively different from each other. Based on these two considerations, a second IoT ingestion pipeline is built for weather data.
+
+
   
