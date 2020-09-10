@@ -43,7 +43,12 @@ Rules are analyzed, and Actions are performed based on the MQTT topic stream. In
 You can change the SQL query according to your own need.
 
 ## Step 3: Add IoT pipeline activity
-In this step, various pipeline activities can be added for data cleansing and feature engineering. In
+A Pipeline is composed of an array of activities. In this step, various pipeline activities can be added for data cleansing and feature engineering. 
+In the following images, it showed examples of either adding filter activity or lambda function to the pipeline.
+
+
+## Step 4: Use IoT dataset from step 3 as input for Sagemaker notebook
+
 
 
 
