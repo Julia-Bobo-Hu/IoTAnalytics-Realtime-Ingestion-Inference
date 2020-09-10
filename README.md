@@ -74,16 +74,17 @@ This lambda function requires numpy and pandas library, and these two libraries 
 
 
 ## Step 4: Use IoT dataset from step 3 as input for Sagemaker notebook
+Once the dataset is generated, sagemaker notebook will be triggered automatically. The sagemaker notebook code is provided in this repository will use the existing ML model generated to predict meter readings for time period Dec. 06-12, 2018.
+The process of containerize the sagemaker notebook is already described in another repository (https://github.com/Julia-Bobo-Hu/Automated_ML_training_IoTNotebook), and will not be repeated in this repository.
+Once the sagemaker notebook finished running, it will produce the results and send it back to S3 bucket for QuickSight dashboard.
 
 ## Step 5: Fetch output file with prediction from S3 bucket to QuickSight for dashboard
 Finally, QuickSight is used as the dashboarding tool to present analytical information to endusers. If you are the individual customers, you probably would like to learn the energy consumption variation for your home!
 
 This figure shows one example of dashboard for smart home customers. The dashboard can be embeded in other applications, and can be sent as emails to endusers.
+![alt text](https://github.com/Julia-Bobo-Hu/IoTAnalytics-Realtime-Ingestion-Inference/blob/master/images/quick_sight.PNG?raw=true)
 
 Last but not least, since the prediction from sagemaker is scheduled to run on a regular basis, the QuickSight dashboard will also refresh the prediction once the sagemaker is triggered.
-
-
-
 
 
 
